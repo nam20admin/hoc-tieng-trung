@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Học Tiếng Trung - 1000 Khóa Học</title>
+    <style>
+        :root {
+            --primary: #c0392b;
+            --secondary: #f39c12;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 340px;
+            background-color: var(--card-bg);
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 20px;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .filter-box {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+
+        .filter-box input, .filter-box select {
+            width: 100%;
+            padding: 8px 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        #course-list {
+            flex: 1;
+            overflow-y: auto;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Chapter Styles */
+        .chapter-group {
+            border-bottom: 1px solid #eee;
+        }
+
+        .chapter-header {
+            padding: 12px 15px;
+            background-color: #f1f3f5;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            color: #333;
+        }
+
+        .chapter-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .chapter-lessons {
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background-color: #fff;
+        }
+
+        .chapter-group.open .chapter-lessons {
+            display: block;
+        }
+
+        .course-item {
+            padding: 10px 15px 10px 25px;
+            border-bottom: 1px solid #f8f9fa;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .course-item:hover, .course-item.active {
+            background-color: #fceae8;
+            border-left: 4px solid var(--primary);
+        }
+
+        .course-item .tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 6px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 3px;
+        }
+
+        /* Main Workspace */
+        #workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .header-bar {
+            padding: 15px 30px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-bar h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background-color: #e9ecef;
+            padding: 0 30px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Module Components */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .hanzi-display {
+            font-size: 48px;
+            color: var(--primary);
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .pinyin-display {
+            font-size: 20px;
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .meaning-display {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: #3498db;
+        }
+
+        .practice-box {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            margin-top: 15px;
+            background: #fafafa;
+        }
+
+        .writing-pad {
+            width: 200px;
+            height: 200px;
+            border: 2px solid var(--primary);
+            margin: 0 auto;
+            background-color: #fff;
+            cursor: crosshair;
+            background-image: 
+                linear-gradient(to right, #eee 1px, transparent 1px),
+                linear-gradient(to bottom, #eee 1px, transparent 1px);
+            background-size: 50% 50%;
+            touch-action: none;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            text-align: left;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #f1f1f1;
+            border-color: #bbb;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda !important;
+            border-color: #c3e6cb !important;
+            color: #155724 !important;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da !important;
+            border-color: #f5c6cb !important;
+            color: #721c24 !important;
+        }
+
+        .quiz-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .quiz-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Course Selection Sidebar -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h2>Học Tiếng Trung 1000</h2>
+            <p>1.000 Bài học • 100 Chương • 10.000 Bài tập</p>
+        </div>
+        <div class="filter-box">
+            <input type="text" id="search-input" placeholder="Tìm kiếm từ vựng, pinyin..." oninput="filterCourses()">
+            <select id="hsk-filter" onchange="filterCourses()">
+                <option value="all">Tất cả trình độ (HSK 1-6)</option>
+                <option value="HSK1">HSK 1 (Bài 1 - 150)</option>
+                <option value="HSK2">HSK 2 (Bài 151 - 350)</option>
+                <option value="HSK3">HSK 3 (Bài 351 - 550)</option>
+                <option value="HSK4">HSK 4 (Bài 551 - 750)</option>
+                <option value="HSK5">HSK 5 (Bài 751 - 900)</option>
+                <option value="HSK6">HSK 6 (Bài 901 - 1000)</option>
+            </select>
+        </div>
+        <div id="course-list"></div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div id="workspace">
+        <div class="header-bar">
+            <h3 id="current-course-title">Đang tải bài học...</h3>
+            <span id="current-hsk-badge" class="tag" style="background:var(--primary); color:white; padding: 5px 10px; border-radius: 4px; font-weight: bold;">HSK 1</span>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('reading')">📖 Tập Đọc</button>
+            <button class="tab-btn" onclick="switchTab('speaking')">🗣️ Tập Nói Chuyện</button>
+            <button class="tab-btn" onclick="switchTab('writing')">✍️ Tập Viết Chữ</button>
+            <button class="tab-btn" onclick="switchTab('quiz')">📝 Giải Bài Tập (10 câu)</button>
+        </div>
+
+        <!-- 1. TAB TẬP ĐỌC -->
+        <div id="tab-reading" class="tab-content active">
+            <div class="card">
+                <div class="hanzi-display" id="read-hanzi">你好</div>
+                <div class="pinyin-display" id="read-pinyin">Nǐ hǎo</div>
+                <div class="meaning-display" id="read-meaning">Xin chào</div>
+                <div style="text-align: center;">
+                    <button class="btn" onclick="playAudio()">🔊 Phát Âm Chuẩn</button>
+                </div>
+            </div>
+            <div class="card">
+                <h4>Hội thoại mẫu / Ví dụ ứng dụng:</h4>
+                <p id="read-example" style="font-size: 18px; line-height: 1.6; color: #444;">A: 你好！(Nǐ hǎo!) - Xin chào!<br>B: 你好！很高兴认识你。(Nǐ hǎo! Hěn gāoxìng rènshí nǐ.) - Xin chào! Rất vui được gặp bạn.</p>
+            </div>
+        </div>
+
+        <!-- 2. TAB TẬP NÓI CHUYỆN -->
+        <div id="tab-speaking" class="tab-content">
+            <div class="card">
+                <h4>Luyện phát âm & Giao tiếp AI</h4>
+                <p>Hãy nhìn mẫu câu và nhấn nút để đọc to:</p>
+                <div class="hanzi-display" id="speak-target">你好</div>
+                <div class="practice-box">
+                    <button class="btn btn-secondary" id="record-btn" onclick="toggleRecording()">🎙️ Bắt đầu nói</button>
+                    <p id="speech-status" style="margin-top: 10px; color: #666;">Nhấn nút và nói vào Micro của bạn...</p>
+                    <div id="speech-result" style="font-weight: bold; margin-top: 10px; font-size: 18px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. TAB TẬP VIẾT -->
+        <div id="tab-writing" class="tab-content">
+            <div class="card">
+                <h4>Luyện viết chữ Hán</h4>
+                <p>Mẫu chữ: <strong id="write-target-text" style="font-size: 20px; color: var(--primary);">你</strong></p>
+                <div class="practice-box">
+                    <canvas id="canvas" class="writing-pad" width="200" height="200"></canvas>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" onclick="clearCanvas()">Xóa viết lại</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. TAB GIẢI BÀI TẬP (10 CÂU CÓ CHUYỂN CÂU) -->
+        <div id="tab-quiz" class="tab-content">
+            <div class="card">
+                <div class="quiz-header-info">
+                    <span id="quiz-step">Câu hỏi 1 / 10</span>
+                    <span id="quiz-score-live">Điểm: 0</span>
+                </div>
+                <div class="quiz-progress-bar">
+                    <div id="quiz-progress-fill" class="quiz-progress-fill"></div>
+                </div>
+
+                <div id="quiz-body">
+                    <h4 id="quiz-question" style="font-size: 18px; margin-top: 0;">Đang tải câu hỏi...</h4>
+                    <div id="quiz-options"></div>
+                    <div id="quiz-feedback" style="margin-top: 15px; font-weight: bold; font-size: 16px;"></div>
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button id="next-quiz-btn" class="btn" style="display: none;" onclick="nextQuestion()">Câu tiếp theo ➔</button>
+                    </div>
+                </div>
+
+                <div id="quiz-result-summary" style="display: none; text-align: center; padding: 20px 0;">
+                    <h2 style="color: var(--primary); margin-bottom: 10px;">Hoàn thành bài tập!</h2>
+                    <p id="quiz-final-score" style="font-size: 22px; font-weight: bold;"></p>
+                    <p id="quiz-evaluation" style="font-size: 16px; color: #555;"></p>
+                    <button class="btn" onclick="restartQuiz()" style="margin-top: 15px;">🔄 Làm lại bài tập</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database 10 từ mẫu làm cốt lõi
+        const baseWords = [
+            { h: "你好", p: "Nǐ hǎo", m: "Xin chào", e: "你好！很高兴认识你。" },
+            { h: "谢谢", p: "Xièxie", m: "Cảm ơn", e: "谢谢你的帮助。" },
+            { h: "再见", p: "Zàijiàn", m: "Tạm biệt", e: "明天再见！" },
+            { h: "中国", p: "Zhōngguó", m: "Trung Quốc", e: "我是中国人。" },
+            { h: "学习", p: "Xuéxí", m: "Học tập", e: "我喜欢学习汉语。" },
+            { h: "朋友", p: "Péngyǒu", m: "Bạn bè", e: "他是我的好朋友。" },
+            { h: "工作", p: "Gōngzuò", m: "Công việc", e: "你工作忙吗？" },
+            { h: "时间", p: "Shíjiān", m: "Thời gian", e: "Wait me, 我没有时间。" },
+            { h: "天气", p: "Tiānqì", m: "Thời tiết", e: "今天天气很好。" },
+            { h: "成功", p: "Chénggōng", m: "Thành công", e: "祝你成功！" }
+        ];
+
+        // Hàm khởi tạo 10 câu hỏi trắc nghiệm riêng biệt cho từng bài
+        function generate10Quizzes(base) {
+            return [
+                { q: `Nghĩa của từ "${base.h}" (${base.p}) là gì?`, options: [base.m, "Tạm biệt", "Cảm ơn", "Ăn cơm"], correct: 0 },
+                { q: `Phiên âm Pinyin của từ "${base.h}" là gì?`, options: ["Mǐ hǎo", base.p, "Xièxie", "Zàijiàn"], correct: 1 },
+                { q: `Từ nào sau đây có nghĩa là "${base.m}"?`, options: ["再见", "谢谢", base.h, "学习"], correct: 2 },
+                { q: `Điền vào chỗ trống: "____ ! 很高兴认识你。"`, options: ["再见", "谢谢", "工作", base.h], correct: 3 },
+                { q: `Nghe/Đọc từ "${base.h}", bạn phát âm thanh điệu như thế nào?`, options: [`Phát âm theo pinyin: ${base.p}`, "Thanh 1 hết", "Thanh 4 hết", "Không có thanh điệu"], correct: 0 },
+                { q: `Câu nào sau đây dịch đúng nghĩa nhất với "${base.h}"?`, options: ["Hẹn gặp lại bạn", base.m, "Xin lỗi bạn", "Cảm ơn rất nhiều"], correct: 1 },
+                { q: `Hán tự "${base.h[0]}" trong từ "${base.h}" xuất hiện trong từ nào?`, options: ["中国", "工作", base.h, "天气"], correct: 2 },
+                { q: `Trong giao tiếp hàng ngày, "${base.h}" thường dùng khi nào?`, options: ["Khi tạm biệt", "Khi nhận quà", "Khi cần giúp đỡ", "Khi bắt đầu chào hỏi"], correct: 3 },
+                { q: `Chọn từ KHÔNG cùng nhóm nghĩa với "${base.h}":`, options: ["您好", "你好", "苹果 (Táo)", "你好吗"], correct: 2 },
+                { q: `Dịch câu sau: "${base.e}"`, options: ["Rất vui được gặp bạn", "Hôm nay thời tiết đẹp", "Tôi học tiếng Trung", "Cảm ơn sự giúp đỡ"], correct: 0 }
+            ];
+        }
+
+        // Tạo hệ thống 1000 Bài học -> 100 Chương (mỗi chương 10 bài)
+        const courses = Array.from({ length: 1000 }, (_, i) => {
+            const id = i + 1;
+            let level = "HSK1";
+            if (id > 150 && id <= 350) level = "HSK2";
+            else if (id > 350 && id <= 550) level = "HSK3";
+            else if (id > 550 && id <= 750) level = "HSK4";
+            else if (id > 750 && id <= 900) level = "HSK5";
+            else if (id > 900) level = "HSK6";
+
+            const base = baseWords[i % baseWords.length];
+            const chapterNum = Math.ceil(id / 10);
+
+            return {
+                id: id,
+                chapter: chapterNum,
+                title: `Bài ${id}: Từ vựng ${base.h}`,
+                hsk: level,
+                hanzi: base.h,
+                pinyin: base.p,
+                meaning: base.m,
+                example: base.e,
+                quizzes: generate10Quizzes(base)
+            };
+        });
+
+        let currentCourse = courses[0];
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+
+        // Khởi chạy ứng dụng
+        function initApp() {
+            renderCourseList(courses);
+            loadCourse(courses[0].id);
+            initCanvas();
+        }
+
+        // Hiển thị danh sách khóa học phân theo Chương (10 bài/chương)
+        function renderCourseList(list) {
+            const container = document.getElementById('course-list');
+            container.innerHTML = '';
+
+            // Nhóm theo chương
+            const chapters = {};
+            list.forEach(c => {
+                if (!chapters[c.chapter]) chapters[c.chapter] = [];
+                chapters[c.chapter].push(c);
+            });
+
+            Object.keys(chapters).sort((a,b) => a - b).forEach(chNum => {
+                const chapterLessons = chapters[chNum];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.className = 'chapter-group';
+
+                // Tự động mở chương nếu chứa bài học đang chọn
+                const isCurrentInChapter = chapterLessons.some(l => l.id === currentCourse.id);
+                if (isCurrentInChapter) chapterDiv.classList.add('open');
+
+                const header = document.createElement('div');
+                header.className = 'chapter-header';
+                header.innerHTML = `
+                    <span>Chương ${chNum} (Bài ${chapterLessons[0].id} - ${chapterLessons[chapterLessons.length - 1].id})</span>
+                    <span style="font-size: 11px; opacity:0.7;">▼</span>
+                `;
+                header.onclick = () => chapterDiv.classList.toggle('open');
+
+                const ul = document.createElement('ul');
+                ul.className = 'chapter-lessons';
+
+                chapterLessons.forEach(c => {
+                    const li = document.createElement('li');
+                    li.className = `course-item ${c.id === currentCourse.id ? 'active' : ''}`;
+                    li.onclick = (e) => {
+                        e.stopPropagation();
+                        loadCourse(c.id);
+                    };
+                    li.innerHTML = `
+                        <span>Bài ${c.id}: ${c.hanzi} (${c.meaning})</span>
+                        <span class="tag">${c.hsk}</span>
+                    `;
+                    ul.appendChild(li);
+                });
+
+                chapterDiv.appendChild(header);
+                chapterDiv.appendChild(ul);
+                container.appendChild(chapterDiv);
+            });
+        }
+
+        // Lọc danh sách bài học
+        function filterCourses() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const hsk = document.getElementById('hsk-filter').value;
+
+            const filtered = courses.filter(c => {
+                const matchesSearch = c.title.toLowerCase().includes(query) || c.hanzi.includes(query) || c.pinyin.toLowerCase().includes(query) || c.meaning.toLowerCase().includes(query);
+                const matchesHSK = hsk === 'all' || c.hsk === hsk;
+                return matchesSearch && matchesHSK;
+            });
+
+            renderCourseList(filtered);
+        }
+
+        // Tải nội dung bài học
+        function loadCourse(id) {
+            currentCourse = courses.find(c => c.id === id);
+            
+            // Cập nhật Header
+            document.getElementById('current-course-title').innerText = `Chương ${currentCourse.chapter} - ${currentCourse.title}`;
+            document.getElementById('current-hsk-badge').innerText = currentCourse.hsk;
+
+            // Cập nhật Tab Tập đọc
+            document.getElementById('read-hanzi').innerText = currentCourse.hanzi;
+            document.getElementById('read-pinyin').innerText = currentCourse.pinyin;
+            document.getElementById('read-meaning').innerText = currentCourse.meaning;
+            document.getElementById('read-example').innerHTML = currentCourse.example;
+
+            // Cập nhật Tab Tập nói & Tập viết
+            document.getElementById('speak-target').innerText = currentCourse.hanzi;
+            document.getElementById('write-target-text').innerText = currentCourse.hanzi[0];
+
+            // Reset và tải Tab Bài tập trắc nghiệm
+            restartQuiz();
+
+            // Cập nhật giao diện Sidebar
+            renderCourseList(courses);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // Web Speech API - Phát âm mẫu
+        function playAudio() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(currentCourse.hanzi);
+                utterance.lang = 'zh-CN';
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Trình duyệt của bạn không hỗ trợ phát âm!");
+            }
+        }
+
+        // Web Speech API - Luyện phát âm (Microphone)
+        let isRecording = false;
+        let recognition;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.continuous = false;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('speech-status').innerText = `Bạn đã nói: "${transcript}"`;
+                
+                if (transcript.includes(currentCourse.hanzi)) {
+                    document.getElementById('speech-result').innerText = "✅ Chính xác! Bạn phát âm rất tốt.";
+                    document.getElementById('speech-result').style.color = "green";
+                } else {
+                    document.getElementById('speech-result').innerText = "❌ Chưa chính xác. Hãy thử phát âm lại!";
+                    document.getElementById('speech-result').style.color = "red";
+                }
+                toggleRecording();
+            };
+
+            recognition.onerror = () => {
+                document.getElementById('speech-status').innerText = "Không nhận diện được giọng nói. Thử lại!";
+                toggleRecording();
+            };
+        }
+
+        function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            if (!recognition) {
+                alert("Trình duyệt không hỗ trợ nhận diện giọng nói.");
+                return;
+            }
+
+            if (!isRecording) {
+                recognition.start();
+                isRecording = true;
+                btn.innerText = "🛑 Đang nghe... (Nói ngay)";
+                btn.style.backgroundColor = "#e74c3c";
+            } else {
+                recognition.stop();
+                isRecording = false;
+                btn.innerText = "🎙️ Bắt đầu nói";
+                btn.style.backgroundColor = "#3498db";
+            }
+        }
+
+        // Canvas Luyện Viết Chữ Hán
+        let canvas, ctx, drawing = false;
+
+        function initCanvas() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#c0392b';
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mousemove', draw);
+
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchmove', draw);
+        }
+
+        function startDrawing(e) {
+            drawing = true;
+            draw(e);
+        }
+
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // MODULE BÀI TẬP (10 CÂU HỎI TRẮC NGHIỆM)
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-body').style.display = 'block';
+            document.getElementById('quiz-result-summary').style.display = 'none';
+            renderQuizStep();
+        }
+
+        function renderQuizStep() {
+            const total = currentCourse.quizzes.length;
+            const q = currentCourse.quizzes[currentQuizIndex];
+
+            // Cập nhật thông tin tiêu đề & thanh tiến trình
+            document.getElementById('quiz-step').innerText = `Câu hỏi ${currentQuizIndex + 1} / ${total}`;
+            document.getElementById('quiz-score-live').innerText = `Điểm: ${quizScore}/${currentQuizIndex}`;
+            document.getElementById('quiz-progress-fill').style.width = `${((currentQuizIndex) / total) * 100}%`;
+
+            document.getElementById('quiz-question').innerText = `Câu ${currentQuizIndex + 1}: ${q.q}`;
+            document.getElementById('quiz-feedback').innerText = '';
+            document.getElementById('next-quiz-btn').style.display = 'none';
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt}`;
+                btn.onclick = () => checkAnswer(idx, q.correct, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, correct, btn) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            if (selected === correct) {
+                btn.classList.add('correct');
+                document.getElementById('quiz-feedback').innerText = "🎉 Chính xác!";
+                document.getElementById('quiz-feedback').style.color = "green";
+                quizScore += 1;
+            } else {
+                btn.classList.add('wrong');
+                buttons[correct].classList.add('correct');
+                document.getElementById('quiz-feedback').innerText = "❌ Tiếc quá, chưa chính xác!";
+                document.getElementById('quiz-feedback').style.color = "red";
+            }
+
+            document.getElementById('quiz-score-live').innerText = `Điểm: ${quizScore}/${currentQuizIndex + 1}`;
+            
+            const nextBtn = document.getElementById('next-quiz-btn');
+            if (currentQuizIndex < currentCourse.quizzes.length - 1) {
+                nextBtn.innerText = "Câu tiếp theo ➔";
+            } else {
+                nextBtn.innerText = "Xem kết quả bài làm 🏆";
+            }
+            nextBtn.style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < currentCourse.quizzes.length) {
+                renderQuizStep();
+            } else {
+                showQuizSummary();
+            }
+        }
+
+        function showQuizSummary() {
+            document.getElementById('quiz-progress-fill').style.width = '100%';
+            document.getElementById('quiz-body').style.display = 'none';
+            
+            const summary = document.getElementById('quiz-result-summary');
+            summary.style.display = 'block';
+
+            const scoreText = document.getElementById('quiz-final-score');
+            scoreText.innerText = `Bạn đạt điểm số: ${quizScore} / 10`;
+
+            const evalText = document.getElementById('quiz-evaluation');
+            if (quizScore === 10) {
+                evalText.innerText = "🌟 Xuất sắc! Bạn đã làm đúng tuyệt đối 10/10 câu.";
+            } else if (quizScore >= 7) {
+                evalText.innerText = "👏 Khá tốt! Bạn đã nắm chắc phần lớn kiến thức.";
+            } else {
+                evalText.innerText = "💪 Hãy ôn tập lại bài đọc và thử làm lại bài tập nhé!";
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
